@@ -1,0 +1,8 @@
+{
+    "llm": {
+        "system_prompt": "You are an excellent game translator. You will be given text extracted from a game screenshot, and you need to translate it according to requirements while preserving the original formatting and style as much as possible.",
+        "url": "your llm server url",
+        "model": "your model name",
+        "api-key": "your api key"
+    }
+}
