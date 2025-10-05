@@ -20,8 +20,8 @@ async def root():
         "usage": "TODO: Add usage instructions here."
     }
     
-@app.post("/ocr")
-async def ocr_from_image(file: UploadFile = File(...)):
+@app.post("/ocr/{lang}")
+async def ocr_from_image(lang: str, file: UploadFile = File(...)):
     if file is None or file.content_type is None:
         raise HTTPException(
             status_code=400, 
@@ -40,20 +40,18 @@ async def ocr_from_image(file: UploadFile = File(...)):
         image_data = await file.read()
         image = Image.open(io.BytesIO(image_data))
         
-        blocks = ocr(image)
-        input_text = []
-        for block in blocks:
-            text = " ".join(line['text'] for line in block['lines'])
-            input_text.append(text)
+        blocks = ocr(image, lang)
+        input_text = [block['text'] for block in blocks]
             
         translated_text = translate_text(input_text, "chi")
         
-        print(translated_text)
+        for block in blocks:
+            block['translated_text'] = translated_text.get(block['text'], "")
         
         return JSONResponse(
             status_code=200,
             content={
-                
+                "blocks": blocks
             }
         )
         

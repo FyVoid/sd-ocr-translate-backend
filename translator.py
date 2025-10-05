@@ -1,8 +1,6 @@
 from llm import to_llm, remove_tag
 import ast
 
-# TODO: add error logging
-
 def _llm_translate(texts: list[str], target_lang: str) -> str:
     prompt = f"""
     ## Tasks:
@@ -27,16 +25,12 @@ def translate_text(texts: list[str], target_lang: str) -> dict[str, str]:
 
     translated_texts = _llm_translate(texts, target_lang)
 
-    try:
-        translated_list = ast.literal_eval(translated_texts)
-    except (ValueError, SyntaxError):
-        print(translated_texts)
-        return {text: "Translation failed: parsing error" for text in texts}
+    translated_list = [text.strip() for text in ast.literal_eval(translated_texts)]
     
     ret = {}
     for i in range(len(texts)):
         original = texts[i]
-        translated = translated_list[i] if i < len(translated_list) else "Translation failed: missing translation"
+        translated = translated_list[i] if i < len(translated_list) else ""
         ret[original] = translated
         
     return ret

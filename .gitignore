@@ -11,3 +11,4 @@ wheels/
 test_assets/
 config.json
 uv.lock
+.DS_Store

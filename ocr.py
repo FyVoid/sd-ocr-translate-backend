@@ -1,8 +1,6 @@
 import pytesseract
 from PIL import Image
 
-# TODO: add error logging
-
 def tesseract_auto_blocks(image: Image.Image, lang: str = 'eng+jpn') -> list[dict]:
     
     data = pytesseract.image_to_data(image, 
@@ -69,10 +67,37 @@ def tesseract_auto_blocks(image: Image.Image, lang: str = 'eng+jpn') -> list[dic
     
     return blocks
 
-def ocr(image: Image.Image, lang: str = 'eng+jpn') -> list[dict]:
-    blocks = tesseract_auto_blocks(image, lang=lang)
+def get_supported_langs() -> list[str]:
+    supported_langs = [
+        'eng', 'chi', 'jpn'
+    ]
+    
+    return supported_langs
 
-    return blocks
+def ocr(image: Image.Image, lang: str = '') -> list[dict]:
+    if lang == '' or lang == 'eng':
+        lang = 'eng'
+    elif lang not in get_supported_langs():
+        raise ValueError(f"Unsupported language: {lang}")
+    else:
+        lang = 'eng+' + lang
+    
+    blocks = tesseract_auto_blocks(image, lang=lang)
+    
+    ret = []
+    for block in blocks:
+        ret.append({
+            'block_num': block['block_num'],
+            'text': ("\n".join(line['text'] for line in block['lines'])).strip(),
+            'bbox': (
+                min(line['bbox'][0] for line in block['lines']),
+                min(line['bbox'][1] for line in block['lines']),
+                max(line['bbox'][0] + line['bbox'][2] for line in block['lines']),
+                max(line['bbox'][1] + line['bbox'][3] for line in block['lines']),
+            ),
+        })
+            
+    return ret
 
 if __name__ == "__main__":
     pass
